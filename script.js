@@ -314,148 +314,201 @@ copyUpiBtn.addEventListener('click', async () => {
 });
 
 /* ─────────────────────────────────────────────────────────
-   13. Button: Download PNG
+   13. Shared Helper — buildQRCanvas()
+   Composes a branded, hi-DPI canvas with QR + payment info.
+   Used by both Download and Share so they produce
+   the exact same image.
+   Returns the composed HTMLCanvasElement.
    ───────────────────────────────────────────────────────── */
-downloadBtn.addEventListener('click', () => {
-  if (!currentUpiUrl) {
-    showToast('⚠️ Generate a QR code first.');
-    return;
-  }
-
-  // Get the QR canvas element rendered by QRCode.js
-  const qrImg = qrCanvas.querySelector('canvas') || qrCanvas.querySelector('img');
-  if (!qrImg) { showToast('⚠️ QR not ready yet.'); return; }
+function buildQRCanvas() {
+  // The canvas QRCode.js rendered into #qrCanvas
+  const qrSource = qrCanvas.querySelector('canvas');
+  if (!qrSource) return null;
 
   const name   = displayName.textContent;
   const upiId  = displayUpi.textContent;
   const amount = displayAmount.textContent;
 
-  // Compose a nice download canvas with label below
-  const padding     = 28;
-  const qrSize      = 200;
-  const headerH     = 48;
-  const infoH       = 80;
-  const totalW      = qrSize + padding * 2;
-  const totalH      = headerH + qrSize + infoH + padding * 1.5;
+  // Layout constants (logical pixels; we then scale 2× for HiDPI)
+  const padding = 28;
+  const qrSize  = 200;
+  const headerH = 48;
+  const infoH   = 80;
+  const totalW  = qrSize + padding * 2;
+  const totalH  = headerH + qrSize + infoH + padding * 1.5;
 
-  const cvs = document.createElement('canvas');
-  cvs.width  = totalW * 2;  // 2× for high DPI
-  cvs.height = totalH * 2;
-  const ctx  = cvs.getContext('2d');
+  const cvs    = document.createElement('canvas');
+  cvs.width    = totalW * 2;
+  cvs.height   = totalH * 2;
+  const ctx    = cvs.getContext('2d');
   ctx.scale(2, 2);
 
-  // Background
+  // White background
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, totalW, totalH);
 
-  // Top accent bar
+  // Top gradient accent bar
   const grad = ctx.createLinearGradient(0, 0, totalW, 0);
   grad.addColorStop(0, '#3d2b8e');
   grad.addColorStop(1, '#f5761a');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, totalW, 4);
 
-  // Header text
+  // Header label
   ctx.fillStyle = '#1a1523';
-  ctx.font = '700 15px "DM Sans", sans-serif';
+  ctx.font      = '700 15px "DM Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('UPI Payment QR', totalW / 2, 30);
 
-  // Draw QR image
+  // QR image
   const qrY = headerH;
-  if (qrImg.tagName === 'CANVAS') {
-    ctx.drawImage(qrImg, padding, qrY, qrSize, qrSize);
-  } else {
-    ctx.drawImage(qrImg, padding, qrY, qrSize, qrSize);
-  }
+  ctx.drawImage(qrSource, padding, qrY, qrSize, qrSize);
 
-  // Info section
+  // Payment info
   const infoY = qrY + qrSize + 16;
+
   ctx.fillStyle = '#1a1523';
-  ctx.font = '600 13px "DM Sans", sans-serif';
+  ctx.font      = '600 13px "DM Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(name, totalW / 2, infoY);
 
   ctx.fillStyle = '#3d2b8e';
-  ctx.font = '400 11px monospace';
+  ctx.font      = '400 11px monospace';
   ctx.fillText(upiId, totalW / 2, infoY + 20);
 
   ctx.fillStyle = '#f5761a';
-  ctx.font = '700 14px "DM Serif Display", serif';
+  ctx.font      = '700 14px serif';
   ctx.fillText(amount, totalW / 2, infoY + 42);
 
   // Footer note
   ctx.fillStyle = '#b8b2c3';
-  ctx.font = '400 9px "DM Sans", sans-serif';
+  ctx.font      = '400 9px "DM Sans", sans-serif';
   ctx.fillText('Scan with any UPI app — PhonePe · GPay · Paytm · BHIM', totalW / 2, infoY + 62);
 
-  // Bottom accent line
+  // Bottom gradient bar
   ctx.fillStyle = grad;
   ctx.fillRect(0, totalH - 3, totalW, 3);
 
-  // Trigger download
-  const link = document.createElement('a');
-  const safeName = (name || 'upi-qr').replace(/[^a-z0-9]/gi, '-').toLowerCase();
-  link.download = `upi-qr-${safeName}.png`;
-  link.href = cvs.toDataURL('image/png');
+  return cvs;
+}
+
+/**
+ * Wraps canvas.toBlob() in a Promise.
+ * @param {HTMLCanvasElement} canvas
+ * @param {string} type  MIME type, default 'image/png'
+ * @returns {Promise<Blob>}
+ */
+function canvasToBlob(canvas, type = 'image/png') {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      blob ? resolve(blob) : reject(new Error('toBlob returned null'));
+    }, type);
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   14. Button: Download PNG
+   ───────────────────────────────────────────────────────── */
+downloadBtn.addEventListener('click', () => {
+  if (!currentUpiUrl) { showToast('⚠️ Generate a QR code first.'); return; }
+
+  const cvs = buildQRCanvas();
+  if (!cvs) { showToast('⚠️ QR not ready yet.'); return; }
+
+  const safeName = (displayName.textContent || 'upi-qr')
+    .replace(/[^a-z0-9]/gi, '-').toLowerCase();
+
+  const link      = document.createElement('a');
+  link.download   = `upi-qr-${safeName}.png`;
+  link.href       = cvs.toDataURL('image/png');
   link.click();
   showToast('📥 QR saved as PNG!');
 });
 
 /* ─────────────────────────────────────────────────────────
-   14. Button: Share
-   Fix: upi:// is a deep-link scheme, NOT a valid web URL.
-   Web Share API requires https:// URLs on most browsers.
-   Solution: share as text (name + UPI ID + amount).
-   Fallback: copy the share text to clipboard.
+   15. Button: Share QR Image
+   ─────────────────────────────────────────────────────────
+   Priority order:
+     1. Web Share API Level 2 — share the actual PNG file
+        (supported: Chrome/Edge Android, Safari iOS 15+,
+         Chrome desktop 89+ on HTTPS)
+     2. Web Share API Level 1 — share title + text only
+        (fallback for browsers without file-share support)
+     3. Clipboard API — copy the PNG image to clipboard
+        (supported: Chrome/Edge desktop, Safari 13.1+)
+     4. Auto-download the PNG as a last resort
    ───────────────────────────────────────────────────────── */
 shareBtn.addEventListener('click', async () => {
-  if (!currentUpiUrl) {
-    showToast('⚠️ Generate a QR code first.');
-    return;
-  }
+  if (!currentUpiUrl) { showToast('⚠️ Generate a QR code first.'); return; }
+
+  const cvs = buildQRCanvas();
+  if (!cvs) { showToast('⚠️ QR not ready yet.'); return; }
 
   const name   = displayName.textContent;
   const upiId  = displayUpi.textContent;
   const amount = displayAmount.textContent;
 
-  const shareText =
-    `💳 Pay via UPI\n` +
-    `Name: ${name}\n` +
-    `UPI ID: ${upiId}\n` +
-    `Amount: ${amount}\n\n` +
-    `Open any UPI app → Scan QR or pay to ${upiId}`;
+  const shareTitle = `Pay ${name} via UPI`;
+  const shareText  =
+    `💳 UPI Payment QR\nName: ${name}\nUPI ID: ${upiId}\nAmount: ${amount}\n\nScan the attached QR code with any UPI app.`;
 
-  // Web Share API (works on mobile browsers with HTTPS)
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: `Pay ${name} via UPI`,
-        text: shareText,
-        // NOTE: upi:// cannot be used as a share URL — omit it
-      });
-      return; // success
-    } catch (e) {
-      if (e.name === 'AbortError') return; // user cancelled — do nothing
-      // Fall through to clipboard fallback on other errors
+  const safeName = (name || 'upi-qr').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+  const fileName = `upi-qr-${safeName}.png`;
+
+  /* ── Strategy 1: Share the PNG file ── */
+  if (navigator.share && navigator.canShare) {
+    let blob;
+    try { blob = await canvasToBlob(cvs); } catch { /* will try next strategy */ }
+
+    if (blob) {
+      const file = new File([blob], fileName, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: shareTitle,
+            text:  shareText,
+          });
+          return; // ✅ success
+        } catch (e) {
+          if (e.name === 'AbortError') return; // user cancelled — do nothing
+          // non-abort error → fall through to next strategy
+        }
+      }
     }
   }
 
-  // Clipboard fallback for desktop / unsupported browsers
-  try {
-    await navigator.clipboard.writeText(shareText);
-    showToast('🔗 Payment details copied to clipboard!');
-  } catch {
-    // Last-resort fallback for very old browsers
-    const ta = document.createElement('textarea');
-    ta.value = shareText;
-    ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast('🔗 Payment details copied!');
+  /* ── Strategy 2: Share title + text only (no file) ── */
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: shareTitle, text: shareText });
+      return; // ✅ success
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      // fall through
+    }
   }
+
+  /* ── Strategy 3: Copy QR image to clipboard ── */
+  if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+    try {
+      const blob = await canvasToBlob(cvs);
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      showToast('🖼️ QR image copied to clipboard!');
+      return; // ✅ success
+    } catch {
+      // fall through to download
+    }
+  }
+
+  /* ── Strategy 4: Auto-download as last resort ── */
+  const link    = document.createElement('a');
+  link.download = fileName;
+  link.href     = cvs.toDataURL('image/png');
+  link.click();
+  showToast('📥 Sharing unavailable — QR downloaded instead.');
 });
 
 /* ─────────────────────────────────────────────────────────
