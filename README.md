@@ -25,34 +25,6 @@
 
 ---
 
-## 📸 Screenshots
-
-> _Add your screenshots here after deployment._
-
----
-
-## 🚀 Getting Started
-
-### Run Locally
-
-No build step required. Just open `index.html` in any modern browser:
-
-```bash
-# Clone the repo
-git clone https://github.com/YOUR_USERNAME/upi-qr.git
-cd upi-qr
-
-# Open directly (or use a local server for full Share API support)
-open index.html
-
-# Recommended: use a local dev server
-npx serve .
-# or
-python3 -m http.server 8080
-```
-
-Then visit `http://localhost:8080` in your browser.
-
 > **Note:** The Web Share API and Clipboard API require a secure context (`https://` or `localhost`). Always test on a local server rather than opening the file directly.
 
 ---
