@@ -93,7 +93,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: clamp(1.5rem, 5vw, 3rem) 1rem clamp(2rem, 5vw, 4rem);
+  padding: 0;
   line-height: 1.6;
   overflow-x: hidden;
   transition: background var(--transition-slow), color var(--transition-slow);
@@ -142,14 +142,245 @@ body {
   66%       { transform: translate(-15px, 15px) scale(0.97); }
 }
 
-/* ── 4. Theme Toggle ──────────────────────────────────────── */
+/* ── 4a. Top Navigation Bar ────────────────────────────────── */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  width: 100%;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(26, 21, 35, 0.06);
+  transition: background var(--transition-slow), border-color var(--transition-slow);
+}
+
+.nav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Brand */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.nav-brand-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, var(--indigo), #7c5de8);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+.nav-brand-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.15rem;
+  color: var(--ink-primary);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.nav-brand-text em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+/* Nav links list */
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.nav-item { position: relative; }
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: color var(--transition), background var(--transition);
+}
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--ink-primary);
+  background: var(--bg-input);
+  outline: none;
+}
+.nav-link--active {
+  color: var(--indigo);
+  background: var(--indigo-light);
+  font-weight: 600;
+}
+[data-theme="dark"] .nav-link--active { color: #9d8cf5; }
+
+/* Dropdown trigger chevron */
+.dropdown-chevron {
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+.nav-item--dropdown:hover .dropdown-chevron,
+.nav-item--dropdown:focus-within .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+/* Dropdown panel */
+.nav-dropdown {
+  list-style: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 32px rgba(26, 21, 35, 0.14);
+  padding: 0.4rem 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+  pointer-events: none;
+  z-index: 300;
+}
+/* Show on hover and keyboard focus-within */
+.nav-item--dropdown:hover .nav-dropdown,
+.nav-item--dropdown:focus-within .nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--ink-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.dropdown-item:hover {
+  background: var(--bg-input);
+  color: var(--ink-primary);
+}
+.dd-icon { font-size: 0.9em; }
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.35rem 0;
+}
+
+/* Right side actions */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Hamburger (mobile only) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  transition: background var(--transition), border-color var(--transition);
+}
+.hamburger:hover { background: var(--bg-input); }
+.ham-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--ink-secondary);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+/* Hamburger → X animation */
+.hamburger.is-open .ham-bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.hamburger.is-open .ham-bar:nth-child(2) { opacity: 0; }
+.hamburger.is-open .ham-bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* Mobile nav drawer */
+@media (max-width: 600px) {
+  .hamburger { display: flex; }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem 1rem;
+    gap: 0.15rem;
+    box-shadow: 0 8px 24px rgba(26,21,35,0.1);
+    z-index: 199;
+  }
+  .nav-links.is-open { display: flex; }
+
+  .nav-item--dropdown .nav-dropdown {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: all;
+    display: none;
+    padding: 0.25rem 0;
+    margin-top: 0.25rem;
+  }
+  .nav-item--dropdown.mobile-dd-open .nav-dropdown { display: block; }
+  .nav-item--dropdown.mobile-dd-open .dropdown-chevron { transform: rotate(180deg); }
+}
+
+/* ── 4. Theme Toggle (inside nav) ──────────────────────────── */
 .theme-toggle {
-  position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: 100;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: var(--bg-card);
@@ -157,14 +388,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: transform var(--transition), background var(--transition),
               border-color var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
 }
 .theme-toggle:hover {
   transform: rotate(20deg) scale(1.1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 /* ── 5. App Wrapper ────────────────────────────────────────── */
@@ -177,6 +409,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 2rem;
+  padding: clamp(1.5rem, 5vw, 3rem) 1rem clamp(2rem, 5vw, 4rem);
   animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -686,12 +919,122 @@ body {
   to   { opacity: 1; }
 }
 
-/* QRcode.js canvas override */
-#qrCanvas canvas,
-#qrCanvas img {
-  display: block !important;
+/* QRcode.js canvas override — hide duplicate <img>, show only <canvas> */
+#qrCanvas canvas { display: block !important; border-radius: 4px; }
+#qrCanvas img    { display: none  !important; }
+
+/* ── About Section ─────────────────────────────────────────── */
+.about-section {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-top: 0.5rem;
+  animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both 0.15s;
+}
+
+.about-heading {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 400;
+  color: var(--ink-primary);
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+.about-heading em { font-style: italic; color: var(--accent); }
+
+.about-lead {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-secondary);
+  line-height: 1.7;
+  margin-top: -1rem;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.about-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.about-card:hover {
+  box-shadow: 0 4px 20px rgba(61, 43, 142, 0.1);
+  transform: translateY(-2px);
+}
+.about-card-icon { font-size: 1.4rem; }
+.about-card h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+.about-card p {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.55;
+}
+
+.about-steps {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.25rem 1.4rem;
+}
+.steps-heading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.steps-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.steps-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--ink-secondary);
+  line-height: 1.55;
+}
+.step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: linear-gradient(135deg, var(--indigo), #7c5de8);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 1px;
+}
+.steps-list code {
+  font-family: monospace;
+  font-size: 0.82em;
+  background: var(--indigo-light);
+  color: var(--indigo);
+  padding: 1px 5px;
   border-radius: 4px;
 }
+[data-theme="dark"] .steps-list code { color: #9d8cf5; }
 
 /* ── 16. Responsive ─────────────────────────────────────────── */
 @media (max-width: 400px) {
@@ -701,7 +1044,7 @@ body {
 }
 
 @media (min-width: 640px) {
-  body { padding: 3rem 1.5rem 4rem; }
+  .app-wrapper { padding: 3rem 1.5rem 4rem; }
 }
 
 /* ── 17. Reduced Motion ─────────────────────────────────────── */

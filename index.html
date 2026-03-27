@@ -23,10 +23,75 @@
   <div class="bg-orb orb-2" aria-hidden="true"></div>
   <div class="bg-orb orb-3" aria-hidden="true"></div>
 
-  <!-- Dark Mode Toggle -->
-  <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
-    <span class="toggle-icon" id="toggleIcon">☀️</span>
-  </button>
+  <!-- ── Top Navigation Bar ── -->
+  <nav class="top-nav" id="topNav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+
+      <!-- Brand -->
+      <a class="nav-brand" href="#" aria-label="UPI QR Home">
+        <span class="nav-brand-icon" aria-hidden="true">₹</span>
+        <span class="nav-brand-text">UPI <em>QR</em></span>
+      </a>
+
+      <!-- Nav Links -->
+      <ul class="nav-links" id="navLinks" role="list">
+
+        <!-- Home -->
+        <li class="nav-item">
+          <a class="nav-link nav-link--active" href="#" id="navHome">Home</a>
+        </li>
+
+        <!-- About App -->
+        <li class="nav-item">
+          <a class="nav-link" href="#aboutSection" id="navAbout">About App</a>
+        </li>
+        <!-- Profile -->
+        <li class="nav-item">
+          <a class="nav-link" href="https://vishwajeetsinghrana8.github.io/" id="navAbout">Profile</a>
+        </li>
+
+        <!-- Hover Dropdown -->
+        <li class="nav-item nav-item--dropdown" id="navDropdownItem">
+          <button class="nav-link nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" id="navDropdownBtn">
+            More
+            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <ul class="nav-dropdown" role="menu" aria-label="More options">
+            <li role="none">
+              <a class="dropdown-item" href="#" role="menuitem" id="ddHowToUse">
+                <span class="dd-icon" aria-hidden="true">📖</span> How to Use
+              </a>
+            </li>
+            <li role="none">
+              <a class="dropdown-item" href="#" role="menuitem" id="ddApps">
+                <span class="dd-icon" aria-hidden="true">📱</span> Supported UPI Apps
+              </a>
+            </li>
+            <li class="dropdown-divider" role="separator" aria-hidden="true"></li>
+            <li role="none">
+              <a class="dropdown-item" href="https://github.com" target="_blank" rel="noopener noreferrer" role="menuitem">
+                <span class="dd-icon" aria-hidden="true">⭐</span> Star on GitHub
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Right side: theme toggle + hamburger -->
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="toggle-icon" id="toggleIcon">☀️</span>
+        </button>
+        <!-- Mobile hamburger -->
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navLinks">
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+        </button>
+      </div>
+
+    </div>
+  </nav>
 
   <main class="app-wrapper">
 
@@ -185,6 +250,45 @@
       <p>QR codes work with all UPI apps &mdash; PhonePe, GPay, Paytm, BHIM &amp; more</p>
       <p class="footer-note">No data is stored. Everything runs in your browser.</p>
     </footer>
+
+    <!-- ── About / Intro Section ── -->
+    <section class="about-section" id="aboutSection" aria-label="About UPI QR Generator">
+      <h2 class="about-heading">About <em>UPI QR</em></h2>
+      <p class="about-lead">A free, privacy-first tool to generate payment QR codes for any UPI ID — instantly, in your browser.</p>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">⚡</div>
+          <h3>Instant Generation</h3>
+          <p>QR codes appear as you type with live preview. No waiting, no loading.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">🔒</div>
+          <h3>100% Private</h3>
+          <p>Everything runs locally in your browser. No data is ever sent to a server.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">📱</div>
+          <h3>Works Everywhere</h3>
+          <p>Compatible with PhonePe, Google Pay, Paytm, BHIM, and all UPI-enabled apps.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">💾</div>
+          <h3>Download & Share</h3>
+          <p>Save your QR as a high-quality PNG or share payment details instantly.</p>
+        </div>
+      </div>
+
+      <div class="about-steps">
+        <h3 class="steps-heading">How to Use</h3>
+        <ol class="steps-list">
+          <li><span class="step-num">1</span><span>Enter the payee's name and UPI ID (e.g. <code>name@okaxis</code>).</span></li>
+          <li><span class="step-num">2</span><span>Optionally set an amount — leave blank to let the payer choose.</span></li>
+          <li><span class="step-num">3</span><span>Click <strong>Generate QR</strong> or watch it appear live as you type.</span></li>
+          <li><span class="step-num">4</span><span>Download the PNG or share the payment details.</span></li>
+        </ol>
+      </div>
+    </section>
 
   </main>
 

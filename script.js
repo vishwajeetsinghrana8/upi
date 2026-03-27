@@ -32,6 +32,16 @@ const themeToggle     = $('themeToggle');
 const toggleIcon      = $('toggleIcon');
 const toast           = $('toast');
 
+// Nav elements
+const hamburger       = $('hamburger');
+const navLinks        = $('navLinks');
+const navDropdownItem = $('navDropdownItem');
+const navDropdownBtn  = $('navDropdownBtn');
+const navAbout        = $('navAbout');
+const navHome         = $('navHome');
+const ddHowToUse      = $('ddHowToUse');
+const ddApps          = $('ddApps');
+
 const placeholderState = $('placeholderState');
 const qrOutput         = $('qrOutput');
 const qrCanvas         = $('qrCanvas');
@@ -393,7 +403,11 @@ downloadBtn.addEventListener('click', () => {
 });
 
 /* ─────────────────────────────────────────────────────────
-   14. Button: Share (Web Share API)
+   14. Button: Share
+   Fix: upi:// is a deep-link scheme, NOT a valid web URL.
+   Web Share API requires https:// URLs on most browsers.
+   Solution: share as text (name + UPI ID + amount).
+   Fallback: copy the share text to clipboard.
    ───────────────────────────────────────────────────────── */
 shareBtn.addEventListener('click', async () => {
   if (!currentUpiUrl) {
@@ -401,27 +415,46 @@ shareBtn.addEventListener('click', async () => {
     return;
   }
 
-  if (!navigator.share) {
-    // Fallback: copy URL
+  const name   = displayName.textContent;
+  const upiId  = displayUpi.textContent;
+  const amount = displayAmount.textContent;
+
+  const shareText =
+    `💳 Pay via UPI\n` +
+    `Name: ${name}\n` +
+    `UPI ID: ${upiId}\n` +
+    `Amount: ${amount}\n\n` +
+    `Open any UPI app → Scan QR or pay to ${upiId}`;
+
+  // Web Share API (works on mobile browsers with HTTPS)
+  if (navigator.share) {
     try {
-      await navigator.clipboard.writeText(currentUpiUrl);
-      showToast('🔗 UPI link copied to clipboard!');
-    } catch {
-      showToast('⚠️ Sharing not supported on this browser.');
+      await navigator.share({
+        title: `Pay ${name} via UPI`,
+        text: shareText,
+        // NOTE: upi:// cannot be used as a share URL — omit it
+      });
+      return; // success
+    } catch (e) {
+      if (e.name === 'AbortError') return; // user cancelled — do nothing
+      // Fall through to clipboard fallback on other errors
     }
-    return;
   }
 
+  // Clipboard fallback for desktop / unsupported browsers
   try {
-    await navigator.share({
-      title: `Pay ${displayName.textContent} via UPI`,
-      text: `UPI ID: ${displayUpi.textContent}\nAmount: ${displayAmount.textContent}`,
-      url: currentUpiUrl,
-    });
-  } catch (e) {
-    if (e.name !== 'AbortError') {
-      showToast('⚠️ Could not share.');
-    }
+    await navigator.clipboard.writeText(shareText);
+    showToast('🔗 Payment details copied to clipboard!');
+  } catch {
+    // Last-resort fallback for very old browsers
+    const ta = document.createElement('textarea');
+    ta.value = shareText;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('🔗 Payment details copied!');
   }
 });
 
@@ -440,7 +473,98 @@ function showToast(message, duration = 2600) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   16. Initial State
+   16. Navigation — Hamburger & Dropdown
+   ───────────────────────────────────────────────────────── */
+
+// Hamburger: toggle mobile nav
+hamburger.addEventListener('click', () => {
+  const open = navLinks.classList.toggle('is-open');
+  hamburger.classList.toggle('is-open', open);
+  hamburger.setAttribute('aria-expanded', open);
+  navDropdownBtn.setAttribute('aria-expanded', 'false');
+  navDropdownItem.classList.remove('mobile-dd-open');
+});
+
+// Mobile dropdown toggle (tap on "More" button)
+navDropdownBtn.addEventListener('click', () => {
+  const isMobile = window.innerWidth <= 600;
+  if (!isMobile) return; // desktop: CSS handles hover
+  const open = navDropdownItem.classList.toggle('mobile-dd-open');
+  navDropdownBtn.setAttribute('aria-expanded', open);
+});
+
+// Close nav on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.top-nav')) {
+    navLinks.classList.remove('is-open');
+    hamburger.classList.remove('is-open');
+    hamburger.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// Close mobile nav when a nav link is clicked
+navLinks.querySelectorAll('a.nav-link, a.dropdown-item').forEach((el) => {
+  el.addEventListener('click', () => {
+    navLinks.classList.remove('is-open');
+    hamburger.classList.remove('is-open');
+    hamburger.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// "Home" nav link — scroll to top, set active state
+navHome.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setActiveNav(navHome);
+});
+
+// "About App" nav link — smooth scroll to about section
+navAbout.addEventListener('click', (e) => {
+  e.preventDefault();
+  const section = document.getElementById('aboutSection');
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setActiveNav(navAbout);
+});
+
+// "How to Use" dropdown item — scroll to about section steps
+if (ddHowToUse) {
+  ddHowToUse.addEventListener('click', (e) => {
+    e.preventDefault();
+    const steps = document.querySelector('.about-steps');
+    if (steps) steps.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else document.getElementById('aboutSection')?.scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+// "Supported UPI Apps" dropdown item — show toast with info
+if (ddApps) {
+  ddApps.addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('📱 Works with PhonePe, GPay, Paytm, BHIM, Amazon Pay & all UPI apps!', 3500);
+  });
+}
+
+// Update active nav link
+function setActiveNav(activeEl) {
+  document.querySelectorAll('.nav-link').forEach((l) => l.classList.remove('nav-link--active'));
+  activeEl.classList.add('nav-link--active');
+}
+
+// Update active nav based on scroll position
+const aboutSection = document.getElementById('aboutSection');
+if (aboutSection && 'IntersectionObserver' in window) {
+  const obs = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) setActiveNav(navAbout);
+      else setActiveNav(navHome);
+    },
+    { threshold: 0.3 }
+  );
+  obs.observe(aboutSection);
+}
+
+/* ─────────────────────────────────────────────────────────
+   17. Initial State
    ───────────────────────────────────────────────────────── */
 showPlaceholder();
 personNameInput.focus();
