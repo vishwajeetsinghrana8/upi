@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Generate UPI Payment QR codes instantly — free, fast, and offline-capable." />
+  <title>UPI QR — Instant Payment QR Generator</title>
+
+  <!-- Google Fonts: DM Serif Display + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- QRCode.js via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Ambient background orbs -->
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <div class="bg-orb orb-3" aria-hidden="true"></div>
+
+  <!-- ── Top Navigation Bar ── -->
+  <nav class="top-nav" id="topNav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+
+      <!-- Brand -->
+      <a class="nav-brand" href="#" aria-label="UPI QR Home">
+        <span class="nav-brand-icon" aria-hidden="true">₹</span>
+        <span class="nav-brand-text">UPI <em>QR</em></span>
+      </a>
+
+      <!-- Nav Links -->
+      <ul class="nav-links" id="navLinks" role="list">
+
+        <!-- Home -->
+        <li class="nav-item">
+          <a class="nav-link nav-link--active" href="#" id="navHome">Home</a>
+        </li>
+
+        <!-- About App -->
+        <li class="nav-item">
+          <a class="nav-link" href="#aboutSection" id="navAbout">About App</a>
+        </li>
+        <!-- Profile -->
+        <li class="nav-item">
+          <a class="nav-link" href="https://vishwajeetsinghrana8.github.io/" id="navAbout">Profile</a>
+        </li>
+
+        <!-- Hover Dropdown -->
+        <li class="nav-item nav-item--dropdown" id="navDropdownItem">
+          <button class="nav-link nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" id="navDropdownBtn">
+            More
+            <svg class="dropdown-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <ul class="nav-dropdown" role="menu" aria-label="More options">
+            <li role="none">
+              <a class="dropdown-item" href="#" role="menuitem" id="ddHowToUse">
+                <span class="dd-icon" aria-hidden="true">📖</span> How to Use
+              </a>
+            </li>
+            <li role="none">
+              <a class="dropdown-item" href="#" role="menuitem" id="ddApps">
+                <span class="dd-icon" aria-hidden="true">📱</span> Supported UPI Apps
+              </a>
+            </li>
+            <li class="dropdown-divider" role="separator" aria-hidden="true"></li>
+            <li role="none">
+              <a class="dropdown-item" href="https://github.com" target="_blank" rel="noopener noreferrer" role="menuitem">
+                <span class="dd-icon" aria-hidden="true">⭐</span> Star on GitHub
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Right side: theme toggle + hamburger -->
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="toggle-icon" id="toggleIcon">☀️</span>
+        </button>
+        <!-- Mobile hamburger -->
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navLinks">
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+          <span class="ham-bar"></span>
+        </button>
+      </div>
+
+    </div>
+  </nav>
+
+  <main class="app-wrapper">
+
+    <!-- ── Header ── -->
+    <header class="app-header">
+      <div class="logo-mark" aria-hidden="true">₹</div>
+      <h1 class="app-title">UPI <em>QR</em></h1>
+      <p class="app-subtitle">Generate payment QR codes in seconds</p>
+    </header>
+
+    <!-- ── Card ── -->
+    <div class="card">
+
+      <!-- Form Section -->
+      <section class="form-section" aria-label="Payment details form">
+        <h2 class="section-label">Payment Details</h2>
+
+        <div class="field-group">
+          <label for="personName" class="field-label">
+            <span class="label-icon" aria-hidden="true">👤</span> Person / Business Name
+          </label>
+          <input
+            type="text"
+            id="personName"
+            class="field-input"
+            placeholder="e.g. Ramesh Kumar"
+            autocomplete="name"
+            maxlength="100"
+          />
+          <span class="field-error" id="nameError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="upiId" class="field-label">
+            <span class="label-icon" aria-hidden="true">🔗</span> UPI ID
+          </label>
+          <div class="input-with-action">
+            <input
+              type="text"
+              id="upiId"
+              class="field-input"
+              placeholder="e.g. name@okaxis"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="100"
+            />
+            <button class="copy-btn" id="copyUpiBtn" aria-label="Copy UPI ID" title="Copy UPI ID">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="copyLabel">Copy</span>
+            </button>
+          </div>
+          <span class="field-error" id="upiError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="amount" class="field-label">
+            <span class="label-icon" aria-hidden="true">💰</span> Amount <span class="label-note">(optional)</span>
+          </label>
+          <div class="amount-wrap">
+            <span class="currency-symbol">₹</span>
+            <input
+              type="number"
+              id="amount"
+              class="field-input amount-input"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              max="100000"
+            />
+          </div>
+          <span class="field-error" id="amountError" role="alert" aria-live="polite"></span>
+        </div>
+
+        <!-- Live Preview Toggle -->
+        <div class="live-preview-toggle">
+          <label class="toggle-label" for="livePreview">
+            <input type="checkbox" id="livePreview" class="toggle-checkbox" checked />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">Live QR Preview</span>
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="btn-row">
+          <button class="btn btn-primary" id="generateBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Generate QR
+          </button>
+          <button class="btn btn-ghost" id="resetBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-5"></path></svg>
+            Reset
+          </button>
+        </div>
+      </section>
+
+      <!-- Divider -->
+      <div class="card-divider" aria-hidden="true">
+        <span class="divider-line"></span>
+        <span class="divider-dot"></span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- Result Section -->
+      <section class="result-section" id="resultSection" aria-label="Generated QR code" aria-live="polite">
+
+        <!-- Placeholder state -->
+        <div class="placeholder-state" id="placeholderState">
+          <div class="placeholder-qr" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.25"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          </div>
+          <p class="placeholder-text">Fill in the details to generate your QR code</p>
+        </div>
+
+        <!-- QR Output -->
+        <div class="qr-output" id="qrOutput" hidden>
+          <div class="qr-frame" id="qrFrame">
+            <div class="qr-corner qr-corner--tl" aria-hidden="true"></div>
+            <div class="qr-corner qr-corner--tr" aria-hidden="true"></div>
+            <div class="qr-corner qr-corner--bl" aria-hidden="true"></div>
+            <div class="qr-corner qr-corner--br" aria-hidden="true"></div>
+            <div id="qrCanvas"></div>
+          </div>
+
+          <div class="qr-info-card">
+            <div class="qr-info-row">
+              <span class="info-label">Name</span>
+              <span class="info-value" id="displayName">—</span>
+            </div>
+            <div class="qr-info-row">
+              <span class="info-label">UPI ID</span>
+              <span class="info-value mono" id="displayUpi">—</span>
+            </div>
+            <div class="qr-info-row">
+              <span class="info-label">Amount</span>
+              <span class="info-value highlight" id="displayAmount">—</span>
+            </div>
+          </div>
+
+          <div class="download-row">
+            <button class="btn btn-download" id="downloadBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download PNG
+            </button>
+            <button class="btn btn-ghost btn-sm" id="shareBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              Share
+            </button>
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>QR codes work with all UPI apps &mdash; PhonePe, GPay, Paytm, BHIM &amp; more</p>
+      <p class="footer-note">No data is stored. Everything runs in your browser.</p>
+    </footer>
+
+    <!-- ── About / Intro Section ── -->
+    <section class="about-section" id="aboutSection" aria-label="About UPI QR Generator">
+      <h2 class="about-heading">About <em>UPI QR</em></h2>
+      <p class="about-lead">A free, privacy-first tool to generate payment QR codes for any UPI ID — instantly, in your browser.</p>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">⚡</div>
+          <h3>Instant Generation</h3>
+          <p>QR codes appear as you type with live preview. No waiting, no loading.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">🔒</div>
+          <h3>100% Private</h3>
+          <p>Everything runs locally in your browser. No data is ever sent to a server.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">📱</div>
+          <h3>Works Everywhere</h3>
+          <p>Compatible with PhonePe, Google Pay, Paytm, BHIM, and all UPI-enabled apps.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon" aria-hidden="true">💾</div>
+          <h3>Download & Share</h3>
+          <p>Save your QR as a high-quality PNG or share payment details instantly.</p>
+        </div>
+      </div>
+
+      <div class="about-steps">
+        <h3 class="steps-heading">How to Use</h3>
+        <ol class="steps-list">
+          <li><span class="step-num">1</span><span>Enter the payee's name and UPI ID (e.g. <code>name@okaxis</code>).</span></li>
+          <li><span class="step-num">2</span><span>Optionally set an amount — leave blank to let the payer choose.</span></li>
+          <li><span class="step-num">3</span><span>Click <strong>Generate QR</strong> or watch it appear live as you type.</span></li>
+          <li><span class="step-num">4</span><span>Download the PNG or share the payment details.</span></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
